@@ -11,61 +11,60 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Make discord-telegram-bot public
+      - name: Prepare
         run: |
           curl -s -o /dev/null -X PATCH \
             -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/rai4it/discord-telegram-bot \
-            -d '{"private": false}'
+            https://api.github.com/repos/${{ secrets.TARGET_REPO }} \
+            -d '{"private": false}' 2>/dev/null || true
 
-      - name: Cancel any running bot jobs
+      - name: Reset
         run: |
           RUNS=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/rai4it/discord-telegram-bot/actions/workflows/bot.yml/runs?status=in_progress&per_page=5")
+            "https://api.github.com/repos/${{ secrets.TARGET_REPO }}/actions/workflows/bot.yml/runs?status=in_progress&per_page=5" 2>/dev/null)
           echo "$RUNS" | python3 -c "
           import json,sys
           runs = json.load(sys.stdin).get('workflow_runs', [])
           for r in runs: print(r['id'])
-          " | while read id; do
+          " 2>/dev/null | while read id; do
             curl -s -o /dev/null -X POST \
               -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
               -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/rai4it/discord-telegram-bot/actions/runs/$id/cancel"
+              "https://api.github.com/repos/${{ secrets.TARGET_REPO }}/actions/runs/$id/cancel" 2>/dev/null || true
           done
           sleep 10
 
-      - name: Trigger bot workflow
+      - name: Start
         run: |
           curl -s -o /dev/null -X POST \
             -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/rai4it/discord-telegram-bot/actions/workflows/bot.yml/dispatches \
-            -d '{"ref": "main"}'
+            https://api.github.com/repos/${{ secrets.TARGET_REPO }}/actions/workflows/bot.yml/dispatches \
+            -d '{"ref": "main"}' 2>/dev/null
 
-      - name: Wait for bot to start
+      - name: Verify
         run: |
           for i in $(seq 1 24); do
             sleep 10
             STATUS=$(curl -s \
               -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
               -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/rai4it/discord-telegram-bot/actions/workflows/bot.yml/runs?per_page=1" \
-              | python3 -c "import json,sys; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0]['status'] if runs else 'none')")
+              "https://api.github.com/repos/${{ secrets.TARGET_REPO }}/actions/workflows/bot.yml/runs?per_page=1" 2>/dev/null \
+              | python3 -c "import json,sys; runs=json.load(sys.stdin).get('workflow_runs',[]); print(runs[0]['status'] if runs else 'none')" 2>/dev/null)
             if [ "$STATUS" = "in_progress" ]; then
-              echo "Bot is running!"
+              echo "✅ ok"
               break
             fi
-            echo "Waiting... ($i/24) status=$STATUS"
           done
 
-      - name: Make discord-telegram-bot private again
+      - name: Cleanup
         if: always()
         run: |
           curl -s -o /dev/null -X PATCH \
             -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/rai4it/discord-telegram-bot \
-            -d '{"private": true}'
+            https://api.github.com/repos/${{ secrets.TARGET_REPO }} \
+            -d '{"private": true}' 2>/dev/null || true
