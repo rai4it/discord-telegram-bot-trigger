@@ -187,6 +187,8 @@ sequenceDiagram
 
 ## Access
 
-This is a private bot for **3rb Investing** members.
+This bot is available **on demand** for 3rb Investing members.
 
-To request access, contact: **@rai4it**
+To request access, reach out on Telegram:
+- 👤 [Mohamed (@Mohamedk50)](https://t.me/Mohamedk50)
+- 👤 [Abdul (@rai4it)](https://t.me/rai4it)
