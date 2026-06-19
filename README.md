@@ -66,49 +66,23 @@ Works with ticker symbols or company names. Arabic company names supported too.
 
 ## How It Works
 
-### `/admin` — 📝 Text Summary Flow
+### `/channels` English Channel Flow
 
 ```mermaid
 sequenceDiagram
     participant U as You (Telegram)
     participant B as Bot
     participant D as Discord
-    participant W as Whisper AI
     participant G as Groq LLM
 
-    U->>B: /admin → tap 📝 period
-    B->>D: fetch all admin messages
-    D-->>B: text messages + voice recordings
-    opt voice found
-        B->>W: transcribe voice to Arabic text
-        W-->>B: transcript (added to message)
-    end
-    B->>G: summarize everything in Arabic with citations
-    G-->>B: detailed Arabic summary
-    B-->>U: summary with ↗ source links + rerun keyboard
-```
-
----
-
-### `/admin` — 🎙 Voice Recordings Flow
-
-```mermaid
-sequenceDiagram
-    participant U as You (Telegram)
-    participant B as Bot
-    participant D as Discord CDN
-    participant W as Whisper AI
-
-    U->>B: /admin → tap 🎙 period
-    B->>D: fetch admin messages with voice
-    loop each voice recording
-        B->>D: download audio (in memory)
-        D-->>B: .ogg audio bytes
-        B->>W: transcribe to Arabic
-        W-->>B: Arabic transcript
-        B-->>U: 🎙 playable voice message + ↗ Discord link
-        B-->>U: Arabic transcript
-    end
+    U->>B: /channels → tap English channel
+    B-->>U: pick period
+    U->>B: tap period
+    B->>D: fetch bot-generated English reports
+    D-->>B: structured financial analysis
+    B->>G: translate word-for-word to Arabic\nkeep all numbers and tickers
+    G-->>B: accurate Arabic translation
+    B-->>U: translation with ↗ source links
 ```
 
 ---
@@ -141,23 +115,49 @@ sequenceDiagram
 
 ---
 
-### `/channels` English Channel Flow
+### `/admin` — 🎙 Voice Recordings Flow
+
+```mermaid
+sequenceDiagram
+    participant U as You (Telegram)
+    participant B as Bot
+    participant D as Discord CDN
+    participant W as Whisper AI
+
+    U->>B: /admin → tap 🎙 period
+    B->>D: fetch admin messages with voice
+    loop each voice recording
+        B->>D: download audio (in memory)
+        D-->>B: .ogg audio bytes
+        B->>W: transcribe to Arabic
+        W-->>B: Arabic transcript
+        B-->>U: 🎙 playable voice message + ↗ Discord link
+        B-->>U: Arabic transcript
+    end
+```
+
+---
+
+### `/admin` — 📝 Text Summary Flow
 
 ```mermaid
 sequenceDiagram
     participant U as You (Telegram)
     participant B as Bot
     participant D as Discord
+    participant W as Whisper AI
     participant G as Groq LLM
 
-    U->>B: /channels → tap English channel
-    B-->>U: pick period
-    U->>B: tap period
-    B->>D: fetch bot-generated English reports
-    D-->>B: structured financial analysis
-    B->>G: translate word-for-word to Arabic\nkeep all numbers and tickers
-    G-->>B: accurate Arabic translation
-    B-->>U: translation with ↗ source links
+    U->>B: /admin → tap 📝 period
+    B->>D: fetch all admin messages
+    D-->>B: text messages + voice recordings
+    opt voice found
+        B->>W: transcribe voice to Arabic text
+        W-->>B: transcript (added to message)
+    end
+    B->>G: summarize everything in Arabic with citations
+    G-->>B: detailed Arabic summary
+    B-->>U: summary with ↗ source links + rerun keyboard
 ```
 
 ---
