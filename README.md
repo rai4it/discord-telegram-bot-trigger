@@ -66,7 +66,7 @@ Works with ticker symbols or company names. Arabic company names supported too.
 
 ## How It Works
 
-### `/admin` Flow
+### `/admin` — 📝 Text Summary Flow
 
 ```mermaid
 sequenceDiagram
@@ -76,18 +76,39 @@ sequenceDiagram
     participant W as Whisper AI
     participant G as Groq LLM
 
-    U->>B: /admin
-    B-->>U: pick period 📝 or 🎙
-    U->>B: tap 📝 24h
-    B->>D: fetch all admin messages — last 24h
+    U->>B: /admin → tap 📝 period
+    B->>D: fetch all admin messages
     D-->>B: text messages + voice recordings
     opt voice found
         B->>W: transcribe voice to Arabic text
-        W-->>B: transcript
+        W-->>B: transcript (added to message)
     end
-    B->>G: summarize everything in Arabic
+    B->>G: summarize everything in Arabic with citations
     G-->>B: detailed Arabic summary
-    B-->>U: summary with ↗ source links
+    B-->>U: summary with ↗ source links + rerun keyboard
+```
+
+---
+
+### `/admin` — 🎙 Voice Recordings Flow
+
+```mermaid
+sequenceDiagram
+    participant U as You (Telegram)
+    participant B as Bot
+    participant D as Discord CDN
+    participant W as Whisper AI
+
+    U->>B: /admin → tap 🎙 period
+    B->>D: fetch admin messages with voice
+    loop each voice recording
+        B->>D: download audio (in memory)
+        D-->>B: .ogg audio bytes
+        B->>W: transcribe to Arabic
+        W-->>B: Arabic transcript
+        B-->>U: 🎙 playable voice message + ↗ Discord link
+        B-->>U: Arabic transcript
+    end
 ```
 
 ---
