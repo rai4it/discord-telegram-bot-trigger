@@ -199,7 +199,7 @@ sequenceDiagram
 
 | Component | Technology |
 |---|---|
-| **Text AI** | Groq — `llama-3.3-70b-versatile` |
+| **Text AI** | Groq — `qwen-qwq-32b` |
 | **Voice AI** | Groq Whisper — `whisper-large-v3-turbo` |
 | **Discord** | REST API — reads all accessible channels |
 | **Telegram** | `python-telegram-bot` |
