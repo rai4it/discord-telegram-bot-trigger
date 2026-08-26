@@ -1,0 +1,28 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # every Monday at 9am UTC
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Commit timestamp if no recent activity
+        run: |
+          LAST=$(git log --oneline --since="7 days ago" | wc -l)
+          if [ "$LAST" -gt "0" ]; then
+            echo "Recent activity found ($LAST commits), skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .last-alive
+          git add .last-alive
+          git commit -m "chore: keep alive [skip ci]"
+          git push
